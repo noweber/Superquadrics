@@ -80,11 +80,11 @@
 				float Ks = pow( max(dot(N, H), 0.0), shininess );
 				vec4  specular = Ks * specularProduct;
 				if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
-				fColor = ambient + diffuse +specular;
+				fColor = ambient + diffuse + specular;
 				fColor.a = 1.0;
                 //gl_FragColor = vec4(wireframeColor, 1.0);
                 //gl_FragColor = fColor * vec4(wireframeColor, 1.0) * texture2D( texture, fTexCoord );
-                gl_FragColor = fColor * texture2D( texture, fTexCoord );
+                gl_FragColor = fColor * vec4(wireframeColor, 1.0) * texture2D( texture, fTexCoord );
                 //gl_FragColor =  vec4(wireframeColor, 1.0) * texture2D( texture, fTexCoord );
             }
         </script>
@@ -103,22 +103,27 @@
 				crossorigin="anonymous" hidden="hidden" />
 		<img id="wood-img" src="http://i.imgur.com/F2g6RQZ.png"
 				crossorigin="anonymous" hidden="hidden" />
+		<img id="plastic-img" src="http://www.clker.com/cliparts/k/m/m/T/O/D/gold-floral-design-hi.png"
+				crossorigin="anonymous" hidden="hidden" />
         <div>
             Shape:
             <select id="shape-select">
                 <option value="superellipsoid">Superellipsoid</option>
-                <option value="superhyperboloidOneSheet">Superhyperboloid of one sheet</option>
+                <!--<option value="superhyperboloidOneSheet">Superhyperboloid of one sheet</option>
                 <option value="superhyperboloidTwoSheets">Superhyperboloid of two sheets</option>
-                <option value="supertorus">Supertorus</option>
+                <option value="supertorus">Supertorus</option>-->
             </select>
         </div>
 		<div>
             Surface Material:
             <select id="surface-select">
-				<option value="wood">Texture Map</option>
-                <option value="tile">Yellow Plastic</option>
-                <option value="wood">Brass Metal</option>
+                <option value="default">Default</option>
+                <option value="yellow-plastic">Yellow Plastic</option>
+                <option value="brass-metal">Brass Metal</option>
             </select>
+        </div>
+		<div>
+            Color: <input id="foreground-color" type="color" value="#ffffff" />
         </div>
 		<div>
             Texture:
@@ -131,9 +136,9 @@
             n1: 
             <select id="superquadric-constant-n1">
                 <option value="10.0">10.0</option>
-                <option value="2.0" selected="selected">2.0</option>
-                <option value="1.11">1.11</option>
-                <option value="0.77">0.77</option>
+                <option value="2.0" >2.0</option>
+                <option value="1.11" >1.11</option>
+                <option value="0.77" selected="selected">0.77</option>
                 <option value="0.59">0.59</option>
             </select>
         </div>
@@ -141,9 +146,9 @@
             n2: 
             <select id="superquadric-constant-n2">
                 <option value="10.0">10.0</option>
-                <option value="2.0" selected="selected">2.0</option>
-                <option value="1.11">1.11</option>
-                <option value="0.77">0.77</option>
+                <option value="2.0" >2.0</option>
+                <option value="1.11" >1.11</option>
+                <option value="0.77" selected="selected">0.77</option>
                 <option value="0.59">0.59</option>
             </select>
         </div>
@@ -162,10 +167,8 @@
                 disabled="disabled" />
         </div>
         <div>
-            FOV: <input id="fov" type="number" value="50" min="1" max="189"/>
+            FOV: <input id="fov" type="number" value="45" min="1" max="189"/>
         </div>
-        <div>
-            Wireframe color: <input id="foreground-color" type="color" value="#ffffff" />
-        </div>
+        
     </body>
 </html>

@@ -33,7 +33,7 @@ function triangle(a, b, c) {
 }
 
 // Lighting
-var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+var lightPosition = vec4(5.0, 1.0, 1.0, 0.0 );
 var lightAmbient = vec4(1.0, 1.0, 1.0, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -90,6 +90,11 @@ function initControlEvents() {
     document.getElementById("texture-select").onchange =
         function(e) {
             updateTexture();
+        };
+	// Event handler for the surface control
+    document.getElementById("surface-select").onchange =
+        function(e) {
+            updateSurface();
         };
 }
 
@@ -170,7 +175,7 @@ window.onload = function() {
     
     // Load the initial data into the GPU
     vBuffer = gl.createBuffer();
-	tBuffer = gl.createBuffer();
+	//tBuffer = gl.createBuffer();
 	nBuffer = gl.createBuffer();
     updateWireframe(superquadrics.superellipsoid, getSuperquadricConstants(), SUBDIV_U, SUBDIV_V);
 
@@ -185,9 +190,12 @@ window.onload = function() {
 	
 	
 	// Initialize the texture
-	//updateTexture();
-	var image = document.getElementById("tile-img");
-    configureTexture( image );
+	updateTexture();
+	//var image = document.getElementById("tile-img");
+    //configureTexture( image );
+	
+	// Initialize the surface:
+	updateSurface();
     
     // Initialize the view and rotation matrices
     findShaderVariables();
@@ -208,7 +216,7 @@ window.onload = function() {
     gl.uniform4fv( gl.getUniformLocation(programId, 
        "diffuseProduct"),flatten(diffuseProduct) );
     gl.uniform4fv( gl.getUniformLocation(programId, 
-       "specularProduct"),flatten(specularProduct) );	
+       "specularProduct"),flatten(specularProduct) );
     gl.uniform4fv( gl.getUniformLocation(programId, 
        "lightPosition"),flatten(lightPosition) );
     gl.uniform1f( gl.getUniformLocation(programId, 
@@ -228,7 +236,7 @@ var rotationMatrix;
 
 // The OpenGL ID of the vertex buffer containing the current shape
 var vBuffer;
-var tBuffer;
+//var tBuffer;
 var nBuffer;
 
 // The number of vertices in the current vertex buffer
@@ -582,11 +590,69 @@ function updateTexture() {
 	var image;
 	if( txtrValue == "tile" ) {
 		image = document.getElementById("tile-img");
-	} else {
+	} 
+	else if ( txtrValue == "wood" ) {
 		image = document.getElementById("wood-img");
+	}
+	else if ( txtrValue == "plastic" ) {
+		image = document.getElementById("plastic-img");
 	}
     configureTexture( image );
 }
+
+function updateSurface() {
+	var surface = document.getElementById("surface-select").value;
+	if( surface == "default" ) {
+		materialAmbient = vec4( 1.0, 1.0, 1.0, 1.0 );
+		ambientProduct = mult(lightAmbient, materialAmbient);
+		gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientProduct) );
+		
+		materialDiffuse = vec4( 1.0, 1.0, 0.0, 1.0 );
+		diffuseProduct = mult(lightDiffuse, materialDiffuse);
+		gl.uniform4fv( gl.getUniformLocation(programId, "diffuseProduct"),flatten(diffuseProduct) );
+		
+		materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+		specularProduct = mult(lightSpecular, materialSpecular);
+		gl.uniform4fv( gl.getUniformLocation(programId, "specularProduct"),flatten(specularProduct) );
+		
+		materialShininess = 50.0;
+		gl.uniform1f( gl.getUniformLocation(programId, "shininess"),materialShininess );
+	} 
+	else if( surface == "yellow-plastic") {
+		materialAmbient = vec4( 1.0, 1.0, 0.0, 1.0 );
+		ambientProduct = mult(lightAmbient, materialAmbient);
+		gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientProduct) );
+		
+		materialDiffuse = vec4( 0.8, 0.8, 0.0, 1.0 );
+		diffuseProduct = mult(lightDiffuse, materialDiffuse);
+		gl.uniform4fv( gl.getUniformLocation(programId, "diffuseProduct"),flatten(diffuseProduct) );
+		
+		materialSpecular = lightSpecular;
+		specularProduct = mult(lightSpecular, materialSpecular);
+		gl.uniform4fv( gl.getUniformLocation(programId, "specularProduct"),flatten(specularProduct) );
+		
+		materialShininess = 50.0;
+		gl.uniform1f( gl.getUniformLocation(programId, "shininess"),materialShininess );
+	}
+	else {
+		materialAmbient = vec4( 0.71, 0.65, 0.26, 1.0 );
+		ambientProduct = mult(lightAmbient, materialAmbient);
+		gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientProduct) );
+		
+		materialDiffuse = vec4( 1.0, 1.0, 0.0, 1.0 );
+		diffuseProduct = mult(lightDiffuse, materialDiffuse);
+		gl.uniform4fv( gl.getUniformLocation(programId, "diffuseProduct"),flatten(diffuseProduct) );
+		
+		materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+		specularProduct = mult(lightSpecular, materialSpecular);
+		gl.uniform4fv( gl.getUniformLocation(programId, "specularProduct"),flatten(specularProduct) );
+		
+		materialShininess = 10.0;
+		gl.uniform1f( gl.getUniformLocation(programId, "shininess"),materialShininess );
+	}
+	
+}
+
 
 // Render the scene
 function render() {
