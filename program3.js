@@ -22,20 +22,24 @@ function triangle(a, b, c) {
      pointsArray.push(c);
     
      // normals are vectors
-     normalsArray.push(normal);
-     normalsArray.push(normal);
-     normalsArray.push(normal);
-     //normalsArray.push(a[0], a[1], a[2]);
-     //normalsArray.push(b[0], b[1], b[2]);
-     //normalsArray.push(c[0], c[1], c[2]);
+     //normalsArray.push(normal);
+     //normalsArray.push(normal);
+     //normalsArray.push(normal);
+     normalsArray.push(a[0], a[1], a[2]);
+     normalsArray.push(b[0], b[1], b[2]);
+     normalsArray.push(c[0], c[1], c[2]);
 
      index += 3;
 }
 
 // Lighting
-var lightPosition = vec4(5.0, 1.0, 1.0, 0.0 );
-var lightAmbient = vec4(1.0, 1.0, 1.0, 1.0 );
+var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+//var lightAmbient = vec4(1.0, 1.0, 1.0, 1.0 );
+//var lightAmbient = vec4(0.8, 0.8, 0.8, 1.0 );
+var lightAmbient = vec4(0.64, 0.64, 0.64, 1.0 );
+//var lightDiffuse = vec4(0.64, 0.64, 0.64, 1.0 );
 var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+//var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var materialAmbient = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -73,6 +77,12 @@ function initControlEvents() {
             updateWireframe(superquadrics[document.getElementById("shape-select").value],
                 getSuperquadricConstants(), SUBDIV_U, SUBDIV_V);
         };
+		/*
+	// Event handler for the light color control
+    document.getElementById("light-color").onchange = 
+        function(e) {
+            updateLightColor(getLightColor());
+        };*/
         
     // Event handler for the foreground color control
     document.getElementById("foreground-color").onchange = 
@@ -118,6 +128,14 @@ function getWireframeColor() {
     var blue = parseInt(hex.substring(5, 7), 16);
     return vec3(red / 255.0, green / 255.0, blue / 255.0);
 }
+/*
+function getLightColor() {
+    var hex = document.getElementById("light-color").value;
+    var red = parseInt(hex.substring(1, 3), 16);
+    var green = parseInt(hex.substring(3, 5), 16);
+    var blue = parseInt(hex.substring(5, 7), 16);
+    return vec3(red / 255.0, green / 255.0, blue / 255.0);
+}*/
 
 // Function for querying the current field of view
 function getFOV() {
@@ -128,13 +146,10 @@ function configureTexture( image ) {
     texture = gl.createTexture();
     gl.bindTexture( gl.TEXTURE_2D, texture );
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 
-         gl.RGB, gl.UNSIGNED_BYTE, image );
+    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image );
     gl.generateMipmap( gl.TEXTURE_2D );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, 
-                      gl.NEAREST_MIPMAP_LINEAR );
+    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR );
     gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
-    
     gl.uniform1i(gl.getUniformLocation(programId, "texture"), 0);
 }
 
@@ -168,11 +183,7 @@ window.onload = function() {
 
     // Setup mouse and keyboard input
     initWindowEvents();
-    
-    // Configure WebGL
-    //gl.viewport(0, 0, canvas.width, canvas.height);
-    //gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    
+ 
     // Load the initial data into the GPU
     vBuffer = gl.createBuffer();
 	//tBuffer = gl.createBuffer();
@@ -185,8 +196,12 @@ window.onload = function() {
     gl.enableVertexAttribArray(vPosition);
 	
 	var vTexCoord = gl.getAttribLocation( programId, "vTexCoord" );
-    gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
+    gl.vertexAttribPointer( vTexCoord, 3, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vTexCoord );
+	
+	var vNormal = gl.getAttribLocation( programId, "vNormal" );
+    gl.vertexAttribPointer( vNormal, 3, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vNormal);
 	
 	
 	// Initialize the texture
@@ -217,7 +232,7 @@ window.onload = function() {
        "diffuseProduct"),flatten(diffuseProduct) );
     gl.uniform4fv( gl.getUniformLocation(programId, 
        "specularProduct"),flatten(specularProduct) );
-    gl.uniform4fv( gl.getUniformLocation(programId, 
+	gl.uniform4fv( gl.getUniformLocation(programId, 
        "lightPosition"),flatten(lightPosition) );
     gl.uniform1f( gl.getUniformLocation(programId, 
        "shininess"),materialShininess );
@@ -454,8 +469,8 @@ function updateWireframe(superquadric, constants, subdivU, subdivV) {
 	var tempPoint4;
     
     // Loop over u and v, generating all the required line segments
-    for (var i = 0; i < subdivU; i++) {
-        for (var j = 0; j < subdivV; j++) {
+    for (var i = 0; i < subdivU+1; i++) {
+        for (var j = 0; j < subdivV+1; j++) {
             // Determine u and v
             var u = superquadric.uMin + i * du;
             var v = superquadric.vMin + j * dv;
@@ -554,8 +569,8 @@ function updateWireframe(superquadric, constants, subdivU, subdivV) {
 	//gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer );
     //gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.DYNAMIC_DRAW );
 	
-	//gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
-    //gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.DYNAMIC_DRAW );
+	gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.DYNAMIC_DRAW );
 }
 
 // The locations of the required GLSL uniform variables.
@@ -567,23 +582,33 @@ function findShaderVariables() {
     locations.projection = gl.getUniformLocation(programId, "projection");
     locations.normalMatrix = gl.getUniformLocation( programId, "normalMatrix" );
     locations.wireframeColor = gl.getUniformLocation(programId, "wireframeColor");
+    locations.wireframeColor = gl.getUniformLocation(programId, "wireframeColor");
 }
 
 // Pass an updated model-view matrix to the graphics card.
 function updateModelView(modelView) {
     gl.uniformMatrix4fv(locations.modelView, false, flatten(modelView));
+	//gl.uniformMatrix4fv(locations.normalMatrix, false, flatten(normalsArray) );
 }
+
 
 // Pass an updated projection matrix to the graphics card.
 function updateProjection(projection) {
     gl.uniformMatrix4fv(locations.projection, false, flatten(projection));
-	//gl.uniformMatrix3fv(locations.normalMatrix, false, flatten(normalMatrix) );
+	//gl.uniformMatrix4fv(locations.normalMatrix, false, flatten(projection) );
 }
 
 // Pass an updated projection matrix to the graphics card.
 function updateWireframeColor(wireframeColor) {
     gl.uniform3fv(locations.wireframeColor, wireframeColor);
 }
+/*
+function updateLightColor(lightColor) {
+	lightAmbient = lightColor;
+	ambientProduct = mult(lightAmbient, materialAmbient);
+	gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientProduct) );
+    //updateSurface();
+}*/
 
 function updateTexture() {
 	var txtrValue = document.getElementById("texture-select").value;
@@ -593,9 +618,6 @@ function updateTexture() {
 	} 
 	else if ( txtrValue == "wood" ) {
 		image = document.getElementById("wood-img");
-	}
-	else if ( txtrValue == "plastic" ) {
-		image = document.getElementById("plastic-img");
 	}
     configureTexture( image );
 }
@@ -620,21 +642,22 @@ function updateSurface() {
 	} 
 	else if( surface == "yellow-plastic") {
 		materialAmbient = vec4( 1.0, 1.0, 0.0, 1.0 );
-		ambientProduct = mult(lightAmbient, materialAmbient);
-		gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientProduct) );
+		var ambientP = mult(lightAmbient, materialAmbient);
+		gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientP) );
 		
 		materialDiffuse = vec4( 0.8, 0.8, 0.0, 1.0 );
-		diffuseProduct = mult(lightDiffuse, materialDiffuse);
-		gl.uniform4fv( gl.getUniformLocation(programId, "diffuseProduct"),flatten(diffuseProduct) );
+		var diffuseP = mult(lightDiffuse, materialDiffuse);
+		gl.uniform4fv( gl.getUniformLocation(programId, "diffuseProduct"),flatten(diffuseP) );
 		
 		materialSpecular = lightSpecular;
-		specularProduct = mult(lightSpecular, materialSpecular);
-		gl.uniform4fv( gl.getUniformLocation(programId, "specularProduct"),flatten(specularProduct) );
+		var specularP = mult(lightSpecular, materialSpecular);
+		gl.uniform4fv( gl.getUniformLocation(programId, "specularProduct"),flatten(specularP) );
 		
-		materialShininess = 50.0;
+		materialShininess = 0.5;
 		gl.uniform1f( gl.getUniformLocation(programId, "shininess"),materialShininess );
 	}
 	else {
+		// Bronze Metal
 		materialAmbient = vec4( 0.71, 0.65, 0.26, 1.0 );
 		ambientProduct = mult(lightAmbient, materialAmbient);
 		gl.uniform4fv( gl.getUniformLocation(programId, "ambientProduct"),flatten(ambientProduct) );
@@ -657,11 +680,15 @@ function updateSurface() {
 // Render the scene
 function render() {
     // Clear the canvas
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	
+
     // Draw the wireframe using gl.LINES
     gl.drawArrays(gl.LINES, 0, wireframePointCount);
-    //gl.drawArrays(gl.TRIANGLES, 0, wireframePointCount);
-	for( var i=0; i<index; i+=1) 
+    //gl.drawArrays(gl.TRIANGLE_STRIP, 0, wireframePointCount);
+	
+	for( var i=0; i<index; i+=1) {
         gl.drawArrays( gl.TRIANGLE_STRIP, i, 3 );
+        //gl.drawArrays( gl.TRIANGLES, i, 3 );
+	}
 }
