@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>Programming Assignment 3</title>
+        <title>Program</title>
 
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec3 vPosition;
@@ -39,8 +39,6 @@
 			
             varying  vec2 fTexCoord;
             uniform vec3 wireframeColor;
-			//varying vec4 fColor;
-			
 			uniform sampler2D texture;
 			
 			uniform vec4 ambientProduct;
@@ -63,9 +61,6 @@
 				fColor = ambient + diffuse + specular;
 				fColor.a = 1.0;
 				
-	
-                //gl_FragColor = vec4(wireframeColor, 1.0);
-                //gl_FragColor = fColor * texture2D( texture, fTexCoord );
                 gl_FragColor = fColor * vec4(wireframeColor, 1.0) * texture2D( texture, fTexCoord );
             }
         </script>
@@ -86,9 +81,6 @@
             Shape:
             <select id="shape-select">
                 <option value="superellipsoid">Superellipsoid</option>
-                <!--<option value="superhyperboloidOneSheet">Superhyperboloid of one sheet</option>
-                <option value="superhyperboloidTwoSheets">Superhyperboloid of two sheets</option>
-                <option value="supertorus">Supertorus</option>-->
             </select>
         </div>
 		<div>
@@ -109,9 +101,6 @@
                 <option value="wood">Wood</option>
             </select>
         </div>
-		<!--<div>
-            Light Color: <input id="light-color" type="color" value="#ffffff" />
-        </div>-->
         <div>
             n1: 
             <select id="superquadric-constant-n1">
